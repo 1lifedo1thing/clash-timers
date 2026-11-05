@@ -137,8 +137,12 @@ object CrashReporter {
         val nm = context.getSystemService(NotificationManager::class.java) ?: return
         if (nm.getNotificationChannel(CHANNEL_ID) == null) {
             nm.createNotificationChannel(
-                NotificationChannel(CHANNEL_ID, "App errors", NotificationManager.IMPORTANCE_HIGH).apply {
-                    description = "Shown when Clash Timers stops because of an error"
+                NotificationChannel(
+                    CHANNEL_ID,
+                    context.getString(R.string.channel_crash),
+                    NotificationManager.IMPORTANCE_HIGH,
+                ).apply {
+                    description = context.getString(R.string.channel_crash_description)
                 },
             )
         }
@@ -148,8 +152,8 @@ object CrashReporter {
         )
         val n = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_stat_timer)
-            .setContentTitle("Clash Timers stopped")
-            .setContentText("Tap to see the error and copy it")
+            .setContentTitle(context.getString(R.string.crash_notification_title))
+            .setContentText(context.getString(R.string.crash_notification_text))
             .setCategory(NotificationCompat.CATEGORY_ERROR)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)

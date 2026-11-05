@@ -2,10 +2,12 @@ package com.kuswa.clashtimer.sync
 
 import android.content.ClipboardManager
 import android.content.Context
+import com.kuswa.clashtimer.R
 import com.kuswa.clashtimer.core.SyncLogic
 import com.kuswa.clashtimer.core.describe
 import com.kuswa.clashtimer.data.Names
 import com.kuswa.clashtimer.data.StateRepository
+import com.kuswa.clashtimer.i18n.texts
 import com.kuswa.clashtimer.widget.WidgetUpdater
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.withContext
@@ -34,14 +36,15 @@ object SyncRunner {
     suspend fun sync(context: Context, clipboard: String?, source: String): Result = withContext(NonCancellable) {
         val app = context.applicationContext
         val repo = StateRepository(app)
+        val texts = app.texts()
         val result = try {
             val outcome = repo.updateState { old ->
-                val o = SyncLogic.apply(old, clipboard)
+                val o = SyncLogic.apply(old, clipboard, texts)
                 o.state to o
             }
-            Result(outcome is SyncLogic.Outcome.Synced, plainText(outcome.describe(Names.get(app))))
+            Result(outcome is SyncLogic.Outcome.Synced, plainText(outcome.describe(Names.get(app), texts)))
         } catch (t: Throwable) {
-            Result(false, "Error: ${t.javaClass.simpleName}: ${t.message}")
+            Result(false, app.resources.getString(R.string.log_error, t.javaClass.simpleName, t.message))
         }
         repo.log(source, result.ok, result.message)
         refreshWidgets(app, source)
@@ -51,7 +54,10 @@ object SyncRunner {
     /** Re-renders every placed widget; logs failures and how many widgets are placed. */
     suspend fun refreshWidgets(context: Context, source: String): Int {
         val count = WidgetUpdater.updateAll(context, source)
-        if (count == 0) StateRepository(context).log(source, null, "No Clash Timers widget is placed on the home screen")
+        if (count == 0) {
+            val app = context.applicationContext
+            StateRepository(app).log(source, null, app.resources.getString(R.string.log_no_widget))
+        }
         return count
     }
 

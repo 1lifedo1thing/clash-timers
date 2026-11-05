@@ -21,6 +21,8 @@ import android.widget.ScrollView
 import android.widget.TextView
 import android.widget.Toast
 import com.kuswa.clashtimer.MainActivity
+import com.kuswa.clashtimer.R
+import com.kuswa.clashtimer.i18n.AppLocale
 
 /**
  * "Clash Timers stopped" screen with the error text and a Copy button. Runs in its own `:crash`
@@ -29,10 +31,15 @@ import com.kuswa.clashtimer.MainActivity
  */
 class CrashActivity : Activity() {
 
+    /** The crash screen runs in its own process, so it wraps the locale itself. */
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(AppLocale.wrap(newBase))
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         CrashReporter.cancelNotification(this)
-        val report = CrashReporter.lastReport(this) ?: "No crash report was saved."
+        val report = CrashReporter.lastReport(this) ?: getString(R.string.crash_no_report)
         setContentView(content(report))
     }
 
@@ -43,25 +50,24 @@ class CrashActivity : Activity() {
             setPadding(pad, pad, pad, pad)
         }
         column.addView(TextView(this).apply {
-            text = "Clash Timers stopped"
+            text = getString(R.string.crash_title)
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 22f)
             setTypeface(typeface, Typeface.BOLD)
             setTextColor(Color.BLACK)
         })
         column.addView(TextView(this).apply {
-            text = "The app hit an error and was closed. Tap Copy and paste the text into your chat, " +
-                "so the cause can be found. The same text stays in the app under Diagnostics > Last crash."
+            text = getString(R.string.crash_body)
             setTextColor(Color.DKGRAY)
             setPadding(0, dp(8), 0, dp(8))
         })
 
         val buttons = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
-        buttons.addView(button("Copy") { copy(report) })
-        buttons.addView(button("Open app") {
+        buttons.addView(button(getString(R.string.copy)) { copy(report) })
+        buttons.addView(button(getString(R.string.open_app)) {
             startActivity(Intent(this, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK))
             finish()
         })
-        buttons.addView(button("Close") { finish() })
+        buttons.addView(button(getString(R.string.close)) { finish() })
         column.addView(buttons)
 
         // Long lines scroll sideways instead of wrapping, so stack frames stay one per line.
@@ -102,9 +108,11 @@ class CrashActivity : Activity() {
 
     private fun copy(report: String) {
         val cm = getSystemService(ClipboardManager::class.java) ?: return
-        cm.setPrimaryClip(ClipData.newPlainText("Clash Timers crash", report))
+        cm.setPrimaryClip(ClipData.newPlainText(getString(R.string.crash_label), report))
         // Android 13+ shows its own "Copied" confirmation.
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) Toast.makeText(this, "Copied", Toast.LENGTH_SHORT).show()
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            Toast.makeText(this, getString(R.string.copied), Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun dp(v: Int) = (v * resources.displayMetrics.density).toInt()

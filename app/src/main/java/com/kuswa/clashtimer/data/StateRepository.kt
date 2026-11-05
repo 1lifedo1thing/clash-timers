@@ -12,6 +12,8 @@ import com.kuswa.clashtimer.core.NameMap
 import com.kuswa.clashtimer.core.SyncLog
 import com.kuswa.clashtimer.core.SyncLogEntry
 import com.kuswa.clashtimer.core.UpgradeTimes
+import com.kuswa.clashtimer.i18n.AppLocale
+import com.kuswa.clashtimer.i18n.texts
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
@@ -66,14 +68,30 @@ class StateRepository(context: Context) {
     }
 }
 
-/** Bundled `assets/names.json`, loaded once per process. */
+/**
+ * Bundled `assets/names.json` plus the translation overlay `assets/names.zh.json`, loaded once per
+ * process and language (the language can change at runtime).
+ */
 object Names {
-    @Volatile private var cached: NameMap? = null
+    @Volatile private var cached: Pair<String, NameMap>? = null
 
-    fun get(context: Context): NameMap = cached ?: synchronized(this) {
-        cached ?: context.applicationContext.assets.open("names.json").bufferedReader().use {
-            NameMap.fromJson(it.readText())
-        }.also { cached = it }
+    fun get(context: Context): NameMap {
+        val tag = AppLocale.languageTag(context)
+        cached?.takeIf { it.first == tag }?.let { return it.second }
+        return synchronized(this) {
+            cached?.takeIf { it.first == tag }?.second ?: build(context, tag).also { cached = tag to it }
+        }
+    }
+
+    private fun build(context: Context, tag: String): NameMap {
+        val assets = context.applicationContext.assets
+        val base = assets.open("names.json").bufferedReader().use { it.readText() }
+        val overlay = if (tag == AppLocale.CHINESE) {
+            runCatching { assets.open("names.zh.json").bufferedReader().use { it.readText() } }.getOrNull()
+        } else {
+            null
+        }
+        return NameMap.fromJson(base, overlay, context.texts())
     }
 }
 

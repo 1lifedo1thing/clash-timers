@@ -46,9 +46,11 @@ data class WidgetModel(
      * a potion/helper window edge (progress bars), a pill's minutes, the footer's sync age.
      */
     val nextChangeAt: Long?,
+    /** Localized text for [buildersLabel] and [title]; English until the app injects its resources. */
+    val texts: Texts = Texts(),
 ) {
-    val buildersLabel: String get() = "BUILDERS $buildersBusy/$buildersTotal"
-    val title: String get() = townHall?.let { "$playerName TH$it" } ?: playerName
+    val buildersLabel: String get() = texts.buildersLabel(buildersBusy, buildersTotal)
+    val title: String get() = townHall?.let { playerName + texts.townHallTag(it) } ?: playerName
     val allRows: List<WidgetRow> get() = builderRows + labRow + petRow
 }
 
@@ -58,11 +60,12 @@ data class BoostPill(
     val secondsLeft: Long?,
     /** A boost of this type is running or queued, so the small `−` (undo) is shown. */
     val canUndo: Boolean = secondsLeft != null,
+    val texts: Texts = Texts(),
 ) {
     val active: Boolean get() = secondsLeft != null
     val text: String
-        get() = secondsLeft?.let(WidgetModelBuilder::formatPill)
-            ?: if (type == BoostType.BUILDER_BITE) "Bite" else "+1"
+        get() = secondsLeft?.let { WidgetModelBuilder.formatPill(it, texts) }
+            ?: if (type == BoostType.BUILDER_BITE) texts.bite else texts.boostAdd
 }
 
 enum class FooterTone { NORMAL, IDLE, ERROR }
@@ -102,6 +105,7 @@ data class WidgetRow(
     val button: RowButton,
     val goblin: Boolean = false,
     val jobKey: String? = null,
+    val texts: Texts = Texts(),
 ) {
     /** `Inferno Tower → 12`, `Super Wizard Tower (new)`. */
     val label: String
@@ -114,13 +118,14 @@ data class WidgetRow(
     /** Text when the per-second countdown is off (or for previews): `1d 20h`, `Completed`, `Idle`. */
     val staticStatus: String
         get() = when (kind) {
-            RowKind.RUNNING -> WidgetModelBuilder.formatRemaining(remaining)
-            RowKind.COMPLETED -> WidgetModelBuilder.COMPLETED
-            RowKind.IDLE -> WidgetModelBuilder.IDLE
+            RowKind.RUNNING -> WidgetModelBuilder.formatRemaining(remaining, texts)
+            RowKind.COMPLETED -> texts.completed
+            RowKind.IDLE -> texts.idle
         }
 }
 
 object WidgetModelBuilder {
+    /** English fallbacks, kept for the unit tests; the app uses [Texts]. */
     const val COMPLETED = "Completed"
     const val IDLE = "Idle"
     const val SYNC_FAILED = "Sync failed — copy data and tap Sync"
@@ -132,21 +137,27 @@ object WidgetModelBuilder {
         names: NameMap,
         times: UpgradeTimes,
         now: Long,
+        texts: Texts = Texts(),
     ): WidgetModel {
         val export = state.export
         val pills = { type: BoostType ->
-            BoostPill(type, boostLeft(state.boosts, type, now), state.boosts.any { it.type == type && it.end > now })
+            BoostPill(
+                type, boostLeft(state.boosts, type, now),
+                state.boosts.any { it.type == type && it.end > now }, texts = texts,
+            )
         }
+        val playerName = settings.playerName?.trim()?.takeIf { it.isNotEmpty() } ?: texts.defaultPlayerName
         if (export == null) {
             return WidgetModel(
-                hasData = false, playerName = settings.displayName, townHall = null,
+                hasData = false, playerName = playerName, townHall = null,
                 buildersBusy = 0, buildersTotal = settings.totalBuilders(null), goblinWorking = false,
                 bite = pills(BoostType.BUILDER_BITE), builderPotion = pills(BoostType.BUILDER_POTION),
                 researchPotion = pills(BoostType.RESEARCH_POTION), petPotion = pills(BoostType.PET_POTION),
                 builderRows = emptyList(),
-                labRow = idleRow("Laboratory", LABORATORY), petRow = idleRow("Pet House", PET_HOUSE),
-                footerLeft = if (state.syncFailed) listOf(FooterPart(SYNC_FAILED, FooterTone.ERROR)) else emptyList(),
-                footerRight = "", syncFailed = state.syncFailed, nextChangeAt = null,
+                labRow = idleRow(texts.laboratory, LABORATORY, texts),
+                petRow = idleRow(texts.petHouse, PET_HOUSE, texts),
+                footerLeft = if (state.syncFailed) listOf(FooterPart(texts.syncFailed, FooterTone.ERROR)) else emptyList(),
+                footerRight = "", syncFailed = state.syncFailed, nextChangeAt = null, texts = texts,
             )
         }
 
@@ -172,7 +183,7 @@ object WidgetModelBuilder {
             return WidgetRow(
                 kind = if (done) RowKind.COMPLETED else RowKind.RUNNING,
                 name = title,
-                levelText = if (job.isNewBuilding) "(new)" else job.targetLevel.toString(),
+                levelText = if (job.isNewBuilding) texts.newSuffix else job.targetLevel.toString(),
                 showArrow = !job.isNewBuilding,
                 iconIds = listOfNotNull(job.dataId, job.typeDataId, job.parentDataId).distinct(),
                 initials = initials(title),
@@ -182,6 +193,7 @@ object WidgetModelBuilder {
                 button = button,
                 goblin = job.isGoblin,
                 jobKey = job.key,
+                texts = texts,
             )
         }
 
@@ -190,15 +202,16 @@ object WidgetModelBuilder {
         // Free builders get no rows; finished jobs stay as "Completed" until the next sync.
         // The Goblin's row disappears once it is done (it is not one of the player's builders).
         val builderRows = sorted(export.builderJobs).filter { !it.isGoblin || running(it) }.map(::row)
-        val labRow = sorted(export.labJobs).firstOrNull()?.let(::row) ?: idleRow("Laboratory", LABORATORY)
-        val petRow = sorted(export.petJobs).firstOrNull()?.let(::row) ?: idleRow("Pet House", PET_HOUSE)
+        val labRow = sorted(export.labJobs).firstOrNull()?.let(::row) ?: idleRow(texts.laboratory, LABORATORY, texts)
+        val petRow = sorted(export.petJobs).firstOrNull()?.let(::row) ?: idleRow(texts.petHouse, PET_HOUSE, texts)
 
         val footerLeft = if (state.syncFailed) {
-            listOf(FooterPart(SYNC_FAILED, FooterTone.ERROR))
+            listOf(FooterPart(texts.syncFailed, FooterTone.ERROR))
         } else {
             helperStatus(
                 apprentice = runningJob(state.links.apprenticeJobKey, export, ::running)?.let { shortName(it, names) },
                 assistant = runningJob(state.links.labAssistantJobKey, export, ::running)?.let { shortName(it, names) },
+                texts = texts,
             )
         }
 
@@ -216,7 +229,7 @@ object WidgetModelBuilder {
 
         return WidgetModel(
             hasData = true,
-            playerName = settings.displayName,
+            playerName = playerName,
             townHall = export.townHallLevel,
             buildersBusy = export.regularBuilderJobs.count(::running),
             buildersTotal = settings.totalBuilders(export),
@@ -229,18 +242,20 @@ object WidgetModelBuilder {
             labRow = labRow,
             petRow = petRow,
             footerLeft = footerLeft,
-            footerRight = "synced ${formatAgo(now - export.timestamp)}",
+            footerRight = texts.syncedAgo(formatAgo(now - export.timestamp, texts)),
             syncFailed = state.syncFailed,
             nextChangeAt = edges.filter { it > now }.minOrNull(),
+            texts = texts,
         )
     }
 
     const val LABORATORY = 1000007
     const val PET_HOUSE = 1000068
 
-    private fun idleRow(name: String, iconId: Int) = WidgetRow(
+    private fun idleRow(name: String, iconId: Int, texts: Texts) = WidgetRow(
         kind = RowKind.IDLE, name = name, levelText = null, showArrow = false, iconIds = listOf(iconId),
         initials = initials(name), finishAt = null, remaining = 0, progress = 1f, button = RowButton.NONE,
+        texts = texts,
     )
 
     private fun runningJob(key: String?, export: VillageExport, running: (Job) -> Boolean): Job? =
@@ -256,14 +271,16 @@ object WidgetModelBuilder {
      * `Apprentice idle · Assistant idle`, `Apprentice idle · Assistant: Baby Dragon`,
      * `Helpers: King · Baby Dragon`. Idle parts are drawn in orange.
      */
-    fun helperStatus(apprentice: String?, assistant: String?): List<FooterPart> =
+    fun helperStatus(apprentice: String?, assistant: String?, texts: Texts = Texts()): List<FooterPart> =
         if (apprentice != null && assistant != null) {
-            listOf(FooterPart("Helpers: $apprentice · $assistant"))
+            listOf(FooterPart(texts.helpersBoth(apprentice, assistant)))
         } else {
             listOf(
-                apprentice?.let { FooterPart("Apprentice: $it") } ?: FooterPart("Apprentice idle", FooterTone.IDLE),
-                FooterPart(" · "),
-                assistant?.let { FooterPart("Assistant: $it") } ?: FooterPart("Assistant idle", FooterTone.IDLE),
+                apprentice?.let { FooterPart(texts.apprenticeBusy(it)) }
+                    ?: FooterPart(texts.apprenticeIdle, FooterTone.IDLE),
+                FooterPart(texts.helpersSeparator),
+                assistant?.let { FooterPart(texts.assistantBusy(it)) }
+                    ?: FooterPart(texts.assistantIdle, FooterTone.IDLE),
             )
         }
 
@@ -285,14 +302,14 @@ object WidgetModelBuilder {
     }
 
     /** Pill text: `42m`, `1h 50m`, `2h`. Minutes are rounded up so a running boost never shows `0m`. */
-    fun formatPill(seconds: Long): String {
+    fun formatPill(seconds: Long, texts: Texts = Texts()): String {
         val minutes = ceil(seconds / 60.0).toLong().coerceAtLeast(1)
         val h = minutes / 60
         val m = minutes % 60
         return when {
-            h == 0L -> "${m}m"
-            m == 0L -> "${h}h"
-            else -> "${h}h ${m}m"
+            h == 0L -> texts.minutesOnly(m)
+            m == 0L -> texts.hoursOnly(h)
+            else -> texts.hoursMinutes(h, m)
         }
     }
 
@@ -311,26 +328,26 @@ object WidgetModelBuilder {
     }
 
     /** `1d 20h`, `5h 12m`, `12m`. Minutes are rounded up so a running job never shows `0m`. */
-    fun formatRemaining(seconds: Long): String {
+    fun formatRemaining(seconds: Long, texts: Texts = Texts()): String {
         val minutes = (seconds + 59) / 60
         val d = minutes / (24 * 60)
         val h = (minutes / 60) % 24
         val m = minutes % 60
         return when {
-            d > 0 -> "${d}d ${h}h"
-            h > 0 -> "${h}h ${m}m"
-            else -> "${m}m"
+            d > 0 -> texts.daysHours(d, h)
+            h > 0 -> texts.hoursMinutes(h, m)
+            else -> texts.minutesOnly(m)
         }
     }
 
     /** `just now`, `12m ago`, `4h ago`, `3d ago`. */
-    fun formatAgo(seconds: Long): String {
+    fun formatAgo(seconds: Long, texts: Texts = Texts()): String {
         val s = seconds.coerceAtLeast(0)
         return when {
-            s < 60 -> "just now"
-            s < 3600 -> "${s / 60}m ago"
-            s < 2 * 86400 -> "${s / 3600}h ago"
-            else -> "${s / 86400}d ago"
+            s < 60 -> texts.justNow
+            s < 3600 -> texts.minutesAgo(s / 60)
+            s < 2 * 86400 -> texts.hoursAgo(s / 3600)
+            else -> texts.daysAgo(s / 86400)
         }
     }
 }

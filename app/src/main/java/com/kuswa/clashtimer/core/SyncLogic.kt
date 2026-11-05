@@ -10,17 +10,17 @@ object SyncLogic {
         data class Failed(override val state: AppState, val reason: String) : Outcome
     }
 
-    fun apply(old: AppState, clipboard: String?): Outcome {
+    fun apply(old: AppState, clipboard: String?, texts: Texts = Texts()): Outcome {
         fun fail(reason: String) = Outcome.Failed(old.copy(syncFailed = true), reason)
 
-        if (clipboard.isNullOrBlank()) return fail("Clipboard is empty")
+        if (clipboard.isNullOrBlank()) return fail(texts.clipboardEmpty)
         val export = when (val r = ExportParser.parse(clipboard)) {
-            is ParseResult.Invalid -> return fail("Not village data: ${r.reason}")
+            is ParseResult.Invalid -> return fail(texts.notVillageData(r.reason))
             is ParseResult.Success -> r.export
         }
         val previous = old.export
         if (previous != null && export.timestamp < previous.timestamp) {
-            return fail("Clipboard export is older than the last sync")
+            return fail(texts.exportTooOld)
         }
 
         val links = HelperLinks(
@@ -77,18 +77,19 @@ object SyncLogic {
 }
 
 /** Plain-text summary of a sync outcome for the toast and the launcher screen. */
-fun SyncLogic.Outcome.describe(names: NameMap): String = when (this) {
-    is SyncLogic.Outcome.Failed -> "Sync failed: $reason"
+fun SyncLogic.Outcome.describe(names: NameMap, texts: Texts = Texts()): String = when (this) {
+    is SyncLogic.Outcome.Failed -> texts.syncFailedPrefix(reason)
     is SyncLogic.Outcome.Synced -> buildString {
         val e = export
-        append("Synced")
-        e.townHallLevel?.let { append(" TH$it") }
+        append(texts.synced)
+        e.townHallLevel?.let { append(texts.townHallTag(it).trim().let { tag -> " $tag" }) }
         val goblin = e.builderJobs.count { it.isGoblin }
-        append(" · ${e.regularBuilderJobs.size} builder job")
-        if (e.regularBuilderJobs.size != 1) append("s")
-        if (goblin > 0) append(" + Goblin")
-        append(" · lab: ").append(e.labJob?.let(names::label) ?: "idle")
-        append(" · pet: ").append(e.petJob?.let(names::label) ?: "idle")
-        e.builderBoostRemaining?.let { append(" · builder potion ${WidgetModelBuilder.formatRemaining(it)} left") }
+        append(texts.builderJobs(e.regularBuilderJobs.size))
+        if (goblin > 0) append(texts.goblinTag.trim().let { " $it" })
+        append(texts.labPrefix(e.labJob?.let(names::label) ?: texts.idleLower))
+        append(texts.petPrefix(e.petJob?.let(names::label) ?: texts.idleLower))
+        e.builderBoostRemaining?.let {
+            append(texts.boostLeft(WidgetModelBuilder.formatRemaining(it, texts)))
+        }
     }
 }

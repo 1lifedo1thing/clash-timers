@@ -4,6 +4,7 @@ import java.io.File
 import java.time.Instant
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 /**
  * Loads the anonymized village exports in `src/test/resources/fixtures`. They have the structure
@@ -48,7 +49,9 @@ object SampleExports {
     val export3: VillageExport by lazy { parse("export_3.json") }
     val export4: VillageExport by lazy { parse("export_4.json") }
 
-    private val FMT = DateTimeFormatter.ofPattern("EEE dd MMM HH:mm:ss")
+    // Locale.US: the expected strings are English, and the JVM's default locale is whatever the
+    // machine has (this failed on a zh-CN developer machine with Chinese weekday names).
+    private val FMT = DateTimeFormatter.ofPattern("EEE dd MMM HH:mm:ss", Locale.US)
 
     /** e.g. "Thu 15 Oct 13:36:18" in UTC. */
     fun utc(epochSec: Long): String = FMT.format(Instant.ofEpochSecond(epochSec).atZone(ZoneOffset.UTC))

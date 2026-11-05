@@ -9,6 +9,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import com.kuswa.clashtimer.R
 import com.kuswa.clashtimer.core.FinishNotices
 import com.kuswa.clashtimer.core.WidgetActions
 import com.kuswa.clashtimer.core.WidgetModelBuilder
@@ -16,6 +17,7 @@ import com.kuswa.clashtimer.core.WidgetSchedule
 import com.kuswa.clashtimer.data.Names
 import com.kuswa.clashtimer.data.StateRepository
 import com.kuswa.clashtimer.data.Times
+import com.kuswa.clashtimer.i18n.texts
 import com.kuswa.clashtimer.notify.Notifier
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -66,11 +68,11 @@ class ClashWidgetReceiver : AppWidgetProvider() {
                 val now = System.currentTimeMillis() / 1000
                 val line = repo.updateState { before ->
                     val after = WidgetActions.apply(before, action, arg, now, settings.boosts)
-                    after to WidgetActions.describe(before, after, action, arg, Names.get(app))
+                    after to WidgetActions.describe(before, after, action, arg, Names.get(app), app.texts())
                 }
                 repo.log("tap", null, line)
             } catch (t: Throwable) {
-                repo.log("tap", false, "Tap failed: ${t.javaClass.simpleName}: ${t.message}")
+                repo.log("tap", false, app.resources.getString(R.string.log_tap_failed, t.javaClass.simpleName, t.message))
             }
             WidgetUpdater.updateAll(app, "tap")
         }
@@ -113,6 +115,8 @@ object WidgetUpdater {
         return try {
             val settings = repo.currentSettings()
             val names = Names.get(app)
+            val texts = app.texts()
+            val res = app.resources
             val nowMs = System.currentTimeMillis()
             val now = nowMs / 1000
 
@@ -121,21 +125,26 @@ object WidgetUpdater {
             // finished rows into "Completed ✓" in the same pass that announced them.
             try {
                 val notices = repo.updateState { state ->
-                    val r = FinishNotices.check(state, settings, names, now)
+                    val r = FinishNotices.check(state, settings, names, now, texts)
                     val fresh = r.notices.filter { it.jobKey !in state.notified }
                     state.copy(notified = r.notified) to fresh
                 }
                 if (notices.isNotEmpty()) {
+                    val separator = res.getString(R.string.log_entry_separator)
+                    val titles = notices.joinToString(separator) { it.title }
                     if (settings.notificationsEnabled) {
                         val posted = Notifier.post(app, notices)
-                        repo.log(source, null, if (posted) "Notified: " + notices.joinToString("; ") { it.title }
-                            else "Not notified (notifications are blocked for the app): " + notices.joinToString("; ") { it.title })
+                        repo.log(
+                            source, null,
+                            if (posted) res.getString(R.string.log_notified, titles)
+                            else res.getString(R.string.log_notified_blocked, titles),
+                        )
                     } else {
-                        repo.log(source, null, "Finished (notifications off): " + notices.joinToString("; ") { it.title })
+                        repo.log(source, null, res.getString(R.string.log_finished_off, titles))
                     }
                 }
             } catch (t: Throwable) {
-                repo.log(source, false, "Notification failed: ${t.javaClass.simpleName}: ${t.message}")
+                repo.log(source, false, res.getString(R.string.log_notification_failed, t.javaClass.simpleName, t.message))
             }
 
             val state = repo.currentState()
@@ -148,7 +157,7 @@ object WidgetUpdater {
                 WidgetAlarm.cancelRedraw(app)
                 return 0
             }
-            val model = WidgetModelBuilder.build(state, settings, names, Times.get(app), now)
+            val model = WidgetModelBuilder.build(state, settings, names, Times.get(app), now, texts)
             val renderer = WidgetRenderer(app)
             for (id in ids) {
                 manager.updateAppWidget(id, renderer.render(model, settings.liveCountdown, manager.getAppWidgetOptions(id)))
@@ -156,7 +165,10 @@ object WidgetUpdater {
             WidgetAlarm.scheduleRedraw(app, WidgetSchedule.nextUpdateMs(model, nowMs, settings.liveCountdown))
             ids.size
         } catch (t: Throwable) {
-            repo.log(source, false, "Widget refresh failed: ${t.javaClass.simpleName}: ${t.message}")
+            repo.log(
+                source, false,
+                app.resources.getString(R.string.log_widget_refresh_failed, t.javaClass.simpleName, t.message),
+            )
             -1
         }
     }

@@ -36,6 +36,11 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import android.appwidget.AppWidgetManager
+import android.content.Context
+import androidx.compose.ui.res.stringResource
+import com.kuswa.clashtimer.R
+import com.kuswa.clashtimer.i18n.AppLocale
+import com.kuswa.clashtimer.i18n.texts
 import com.kuswa.clashtimer.core.AppSettings
 import com.kuswa.clashtimer.core.AppState
 import com.kuswa.clashtimer.core.Countdown
@@ -71,6 +76,11 @@ import java.time.format.DateTimeFormatter
  * Players usually have no adb/logcat, so this screen is the diagnostics channel.
  */
 class MainActivity : ComponentActivity() {
+    /** Makes the chosen in-app language apply to every string on this screen. */
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(AppLocale.wrap(newBase))
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -130,8 +140,8 @@ private fun SyncScreen(modifier: Modifier = Modifier) {
         modifier = modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        Text("Clash Timers", style = MaterialTheme.typography.headlineSmall)
-        Text("1. In Clash: Settings > Data Export > Copy.\n2. Come back here and tap the button.")
+        Text(stringResource(R.string.app_name), style = MaterialTheme.typography.headlineSmall)
+        Text(stringResource(R.string.sync_help))
 
         Button(
             onClick = {
@@ -145,19 +155,28 @@ private fun SyncScreen(modifier: Modifier = Modifier) {
             },
             enabled = !busy,
             modifier = Modifier.fillMaxWidth(),
-        ) { Text(if (busy) "Syncing…" else "Sync from clipboard") }
+        ) { Text(stringResource(if (busy) R.string.sync_busy else R.string.sync_button)) }
 
         // Last result, in plain text.
         val last = log.lastResult
-        Text("Last sync result", fontWeight = FontWeight.Bold)
+        Text(stringResource(R.string.last_result), fontWeight = FontWeight.Bold)
         SelectionContainer {
             Text(
-                if (last == null) "No sync yet."
-                else "${if (last.ok == true) "OK" else "FAILED"} · ${fmt(last.at)} · from ${last.source}\n${SyncRunner.plainText(last.message)}",
+                if (last == null) {
+                    stringResource(R.string.no_sync_yet)
+                } else {
+                    stringResource(
+                        R.string.sync_result_line,
+                        stringResource(if (last.ok == true) R.string.status_ok else R.string.status_failed),
+                        fmt(last.at),
+                        last.source,
+                        SyncRunner.plainText(last.message),
+                    )
+                },
                 color = if (last?.ok == false) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface,
             )
         }
-        state.export?.let { Text("Export copied at ${fmt(it.timestamp)} (village ${it.tag})") }
+        state.export?.let { Text(stringResource(R.string.export_copied_at, fmt(it.timestamp), it.tag)) }
 
         HorizontalDivider()
         SettingsSection(settings, state.export, now) { change ->
@@ -169,20 +188,26 @@ private fun SyncScreen(modifier: Modifier = Modifier) {
 
         // ---- Diagnostics (no logcat on most phones): below the settings. ----
         HorizontalDivider()
-        Text("Diagnostics", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
+        Text(stringResource(R.string.diagnostics), fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
         CrashSection()
-        Text("Widget", fontWeight = FontWeight.Bold)
+        Text(stringResource(R.string.widget_section), fontWeight = FontWeight.Bold)
         Text(
             when (widgetCount) {
-                -1 -> "Widgets placed: unknown"
-                0 -> "No Clash Timers widget is on the home screen yet."
-                else -> "Widgets placed: $widgetCount"
+                -1 -> stringResource(R.string.widgets_unknown)
+                0 -> stringResource(R.string.widgets_none)
+                else -> stringResource(R.string.widgets_count, widgetCount)
             },
         )
         if (widgetSizes.isNotEmpty()) Text(widgetSizes, style = MaterialTheme.typography.bodySmall)
         Text(
-            "Icons in assets/icons: ${WidgetIcons.get(context).available.size} · upgrade times for ${times.size} items · " +
-                "exact alarms: ${if (WidgetAlarm.canScheduleExact(context)) "allowed" else "not allowed (1-min window)"}",
+            stringResource(
+                R.string.diagnostics_icons,
+                WidgetIcons.get(context).available.size,
+                times.size,
+                stringResource(
+                    if (WidgetAlarm.canScheduleExact(context)) R.string.exact_allowed else R.string.exact_not_allowed,
+                ),
+            ),
             style = MaterialTheme.typography.bodySmall,
         )
         if (!WidgetAlarm.canScheduleExact(context) && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
@@ -193,9 +218,9 @@ private fun SyncScreen(modifier: Modifier = Modifier) {
                             .setData(android.net.Uri.parse("package:${context.packageName}")),
                     )
                 }
-            }) { Text("Allow exact alarms") }
+            }) { Text(stringResource(R.string.allow_exact_alarms)) }
         }
-        SwitchRow("Live seconds countdown (turn off if the times don't show)", settings.liveCountdown) { on ->
+        SwitchRow(stringResource(R.string.live_countdown), settings.liveCountdown) { on ->
             scope.launch {
                 repo.updateSettings { it.copy(liveCountdown = on) }
                 SyncRunner.refreshWidgets(context, "app")
@@ -204,20 +229,20 @@ private fun SyncScreen(modifier: Modifier = Modifier) {
         OutlinedButton(
             onClick = { scope.launch { widgetCount = SyncRunner.refreshWidgets(context, "app") } },
             modifier = Modifier.fillMaxWidth(),
-        ) { Text("Refresh widget") }
+        ) { Text(stringResource(R.string.refresh_widget)) }
 
-        Text("The widget should show:", fontWeight = FontWeight.Bold)
+        Text(stringResource(R.string.should_show), fontWeight = FontWeight.Bold)
         SelectionContainer {
             Text(
-                widgetPreview(WidgetModelBuilder.build(state, settings, names, times, now)),
+                widgetPreview(WidgetModelBuilder.build(state, settings, names, times, now, context.texts())),
                 fontFamily = FontFamily.Monospace,
                 style = MaterialTheme.typography.bodySmall,
             )
         }
 
         HorizontalDivider()
-        Text("Recent activity", fontWeight = FontWeight.Bold)
-        if (log.entries.isEmpty()) Text("Nothing yet.")
+        Text(stringResource(R.string.recent_activity), fontWeight = FontWeight.Bold)
+        if (log.entries.isEmpty()) Text(stringResource(R.string.nothing_yet))
         SelectionContainer {
             Text(SyncRunner.plainText(log.entries.joinToString("\n") { it.line() }), style = MaterialTheme.typography.bodySmall)
         }
@@ -241,9 +266,12 @@ private fun widgetSizeReport(context: android.content.Context, state: AppState):
         val o = manager.getAppWidgetOptions(id)
         val w = WidgetRenderer.reportedWidthDp(o)
         val h = WidgetRenderer.reportedHeightDp(o)
-        val size = if (w != null && h != null) "${w}×${h} dp" else "size not reported"
-        val rowSize = if (WidgetRenderer.useCompactRows(o, rows)) "compact 25 dp rows" else "30 dp rows"
-        "Widget #$id: $size · $rowSize (30 dp rows need about ${WidgetRenderer.normalHeightDp(rows)} dp)"
+        val size = if (w != null && h != null) context.getString(R.string.widget_size_reported, w, h)
+        else context.getString(R.string.widget_size_unknown)
+        val rowSize = context.getString(
+            if (WidgetRenderer.useCompactRows(o, rows)) R.string.rows_compact else R.string.rows_normal,
+        )
+        context.getString(R.string.widget_size_line, id, size, rowSize, WidgetRenderer.normalHeightDp(rows))
     }
 }
 

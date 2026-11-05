@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  简体中文（大陆）。术语按《部落冲突》国服/国际服中文版：
+  建筑工人、实验室、宠物屋、建筑工人药水、建筑工人大餐、研究药水、宠物药水、
+  建筑工人学徒、实验室助手、哥布林工人、大本营、数据导出。
+-->
+<resources>
+    <string name="app_name">Clash Timers</string>
+    <string name="widget_name">Clash Timers</string>
+    <string name="widget_description">从村庄数据导出的建筑工人、实验室和宠物屋倒计时</string>
+
+    <!-- 主界面 -->
+    <string name="sync_help">1. 在部落冲突中进入「设置 &gt; 数据导出 &gt; 复制」。\n2. 回到这里，点下面的按钮。</string>
+    <string name="sync_button">从剪贴板同步</string>
+    <string name="sync_busy">正在同步…</string>
+    <string name="last_result">最近一次同步结果</string>
+    <string name="no_sync_yet">还没有同步过。</string>
+    <string name="sync_result_line">%1$s · %2$s · 来源 %3$s\n%4$s</string>
+    <string name="status_ok">成功</string>
+    <string name="status_failed">失败</string>
+    <string name="export_copied_at">导出时间 %1$s（村庄 %2$s）</string>
+    <string name="diagnostics">诊断信息</string>
+    <string name="widget_section">桌面小组件</string>
+    <string name="widgets_unknown">已放置的小组件：未知</string>
+    <string name="widgets_none">桌面上还没有放置 Clash Timers 小组件。</string>
+    <string name="widgets_count">已放置的小组件：%1$d 个</string>
+    <string name="diagnostics_icons">图标资源：%1$d 个 · 升级耗时数据：%2$d 项 · 精确闹钟：%3$s</string>
+    <string name="exact_allowed">已允许</string>
+    <string name="exact_not_allowed">未允许（1 分钟窗口）</string>
+    <string name="allow_exact_alarms">允许精确闹钟</string>
+    <string name="live_countdown">逐秒倒计时（时间显示不出来时请关闭）</string>
+    <string name="refresh_widget">刷新小组件</string>
+    <string name="should_show">小组件应显示：</string>
+    <string name="recent_activity">最近记录</string>
+    <string name="nothing_yet">暂无记录。</string>
+    <string name="widget_size_reported">%1$s×%2$s dp</string>
+    <string name="widget_size_unknown">未上报尺寸</string>
+    <string name="rows_compact">紧凑行高 25 dp</string>
+    <string name="rows_normal">行高 30 dp</string>
+    <string name="widget_size_line">小组件 #%1$d：%2$s · %3$s（30 dp 行高约需 %4$d dp）</string>
+
+    <!-- 设置 -->
+    <string name="settings">设置</string>
+    <string name="player_name">玩家名称</string>
+    <string name="change">修改</string>
+    <string name="potions_heading">药水与大餐：每使用 1 小时节省的小时数</string>
+    <string name="builder_potion">建筑工人药水</string>
+    <string name="builder_bite">建筑工人大餐</string>
+    <string name="research_potion">研究药水</string>
+    <string name="pet_potion">宠物药水</string>
+    <string name="helpers_heading">助手</string>
+    <string name="apprentice_saving">建筑工人学徒每次节省</string>
+    <string name="lab_assistant_saving">实验室助手每次节省</string>
+    <string name="helper_period">助手时段间隔</string>
+    <string name="helper_period_value">%1$d 小时</string>
+    <string name="helper_period_hint">游戏内实测为 23 小时</string>
+    <string name="builders_heading">建筑工人</string>
+    <string name="total_builders">建筑工人总数</string>
+    <string name="auto_value">自动（%1$d）</string>
+    <string name="builders_hint">按导出数据中的建筑工人小屋 + B.O.B 小屋计算</string>
+    <string name="auto">自动</string>
+    <string name="boosts_goblin">药水和大餐也会加速哥布林工人</string>
+    <string name="notifications_heading">通知</string>
+    <string name="notify_free">建筑工人、实验室或宠物屋空闲时通知我</string>
+    <string name="notifications_blocked">本应用的通知已被关闭，不会弹出任何提示。</string>
+    <string name="allow">允许</string>
+    <string name="open_settings">打开设置</string>
+    <string name="battery_hint">如果通知延迟或重启后不再提示，请在手机的应用设置里给 Clash Timers 打开「自启动」，并把电池使用设为「不受限制」。</string>
+    <string name="app_settings_button">应用设置（电池、自启动）</string>
+    <string name="reset_settings">恢复默认设置</string>
+    <string name="hours_value">%1$d 小时（%2$d 倍）</string>
+    <string name="auto_hours">自动（%1$s）</string>
+    <string name="level">等级</string>
+    <string name="helper_level_hint">助手等级 = 每小时节省的小时数</string>
+
+    <!-- 语言 -->
+    <string name="language">语言</string>
+    <string name="language_system">跟随系统</string>
+    <string name="language_zh">简体中文</string>
+    <string name="language_en">English</string>
+
+    <!-- 改名对话框 -->
+    <string name="chief">首领</string>
+    <string name="welcome_chief">欢迎，首领！</string>
+    <string name="player_name_title">玩家名称</string>
+    <string name="name_question">小组件上显示什么名字？留空则使用「%1$s」。</string>
+    <string name="save">保存</string>
+    <string name="skip">跳过</string>
+    <string name="cancel">取消</string>
+
+    <!-- 关于 -->
+    <string name="about">关于</string>
+    <string name="about_version">Clash Timers %1$s</string>
+    <string name="offline_title">完全离线运行</string>
+    <string name="offline_text">本应用没有联网权限。它只读取你在部落冲突里复制的村庄数据，保存在本机，不会发送到任何地方。没有账号、没有广告、没有统计。</string>
+    <string name="fan_content_disclaimer">本内容为非官方内容，未获得 Supercell 认可。详情请见 Supercell 粉丝内容政策：www.supercell.com/fan-content-policy。</string>
+    <string name="credits">部落冲突的名称与图片版权归 Supercell 所有。名称、升级耗时与图片来自 clash-of-clans-data 数据包。字体：Lilita One（作者 Juan Montoreano，SIL Open Font License 1.1）。</string>
+    <string name="show_font_licence">显示字体许可</string>
+    <string name="hide_font_licence">隐藏字体许可</string>
+    <string name="licence_missing">许可文件缺失。</string>
+
+    <!-- 诊断：崩溃记录 -->
+    <string name="last_crash">最近一次崩溃</string>
+    <string name="none_saved">没有记录。</string>
+    <string name="copy">复制</string>
+    <string name="show">显示</string>
+    <string name="hide">收起</string>
+    <string name="clear">清除</string>
+    <string name="open_crash_screen">打开崩溃页面</string>
+    <string name="test_crash_screen">测试崩溃页面</string>
+    <string name="test_crash_message">来自诊断按钮的测试崩溃（不是真的出错）</string>
+
+    <!-- 崩溃页面 -->
+    <string name="crash_label">Clash Timers 崩溃</string>
+    <string name="crash_title">Clash Timers 已停止运行</string>
+    <string name="crash_body">应用出错被关闭了。点「复制」把内容粘贴到聊天里，方便定位原因。同样的内容也保留在应用内的「诊断信息 &gt; 最近一次崩溃」里。</string>
+    <string name="crash_no_report">没有保存崩溃报告。</string>
+    <string name="channel_crash">应用错误</string>
+    <string name="channel_crash_description">Clash Timers 因出错停止运行时显示</string>
+    <string name="crash_notification_title">Clash Timers 已停止运行</string>
+    <string name="crash_notification_text">点按查看错误并复制</string>
+    <string name="open_app">打开应用</string>
+    <string name="close">关闭</string>
+    <string name="copied">已复制</string>
+
+    <!-- 同步日志 -->
+    <string name="log_no_widget">桌面上还没有放置 Clash Timers 小组件</string>
+    <string name="log_sync_opened">从小组件打开了同步页面</string>
+    <string name="log_no_focus">%1$d 毫秒后仍无窗口焦点，仍然尝试读取剪贴板</string>
+    <string name="log_timeout">同步页面超时未完成</string>
+    <string name="log_notified">已通知：%1$s</string>
+    <string name="log_notified_blocked">未通知（本应用的通知被关闭）：%1$s</string>
+    <string name="log_finished_off">已完成（通知开关关闭）：%1$s</string>
+    <string name="log_error">错误：%1$s：%2$s</string>
+    <string name="log_tap_failed">点击处理失败：%1$s：%2$s</string>
+    <string name="log_notification_failed">通知发送失败：%1$s：%2$s</string>
+    <string name="log_widget_refresh_failed">小组件刷新失败：%1$s：%2$s</string>
+    <string name="log_entry_separator">；</string>
+
+    <!-- 通知 -->
+    <string name="channel_finished">升级完成</string>
+    <string name="channel_finished_description">建筑工人、实验室或宠物屋已经空闲</string>
+
+    <!-- 小组件与模型文案 -->
+    <string name="w_builders">建筑工人 %1$d/%2$d</string>
+    <string name="w_completed">已完成</string>
+    <string name="w_idle">空闲</string>
+    <string name="w_sync_failed">同步失败 — 复制数据后点同步</string>
+    <string name="w_no_data">在部落冲突里复制村庄数据，再点同步</string>
+    <string name="w_laboratory">实验室</string>
+    <string name="w_pet_house">宠物屋</string>
+    <string name="w_crafted_defense">自制防御</string>
+    <string name="w_new">（新建）</string>
+    <string name="w_unknown">未知（%1$d）</string>
+    <string name="w_goblin_tag"> ＋哥布林</string>
+    <string name="w_town_hall_tag"> %1$d本</string>
+    <string name="w_bite">大餐</string>
+    <string name="w_boost_add">+1</string>
+    <string name="w_helpers_both">助手：%1$s · %2$s</string>
+    <string name="w_apprentice_busy">学徒：%1$s</string>
+    <string name="w_apprentice_idle">学徒空闲</string>
+    <string name="w_assistant_busy">实验室助手：%1$s</string>
+    <string name="w_assistant_idle">助手空闲</string>
+    <string name="w_helpers_separator"> · </string>
+    <string name="w_synced_ago">%1$s同步</string>
+    <string name="w_just_now">刚刚</string>
+    <string name="w_minutes_ago">%1$d 分钟前</string>
+    <string name="w_hours_ago">%1$d 小时前</string>
+    <string name="w_days_ago">%1$d 天前</string>
+    <string name="w_days_hours">%1$d 天 %2$d 小时</string>
+    <string name="w_hours_minutes">%1$d 小时 %2$d 分</string>
+    <string name="w_hours">%1$d 小时</string>
+    <string name="w_minutes">%1$d 分</string>
+
+    <!-- 同步结果摘要 -->
+    <string name="sync_failed_prefix">同步失败：%1$s</string>
+    <string name="reason_clipboard_empty">剪贴板是空的</string>
+    <string name="reason_not_village">不是村庄数据：%1$s</string>
+    <string name="reason_older">剪贴板里的数据比上次同步更旧</string>
+    <string name="sync_synced">已同步</string>
+    <plurals name="sync_builder_jobs">
+        <item quantity="other"> · %1$d 个建筑工人任务</item>
+    </plurals>
+    <string name="sync_lab"> · 实验室：%1$s</string>
+    <string name="sync_pet"> · 宠物：%1$s</string>
+    <string name="sync_idle">空闲</string>
+    <string name="sync_boost_left"> · 建筑工人药水剩余 %1$s</string>
+
+    <!-- 完成通知 -->
+    <string name="notice_builder_free">建筑工人空闲：%1$s</string>
+    <string name="notice_lab_free">实验室空闲</string>
+    <string name="notice_pet_free">宠物屋空闲</string>
+    <string name="notice_goblin_done">哥布林工人完成：%1$s</string>
+    <string name="notice_built">%1$s 已建好。</string>
+    <string name="notice_level">%1$s 升到 %2$d 级。</string>
+
+    <!-- 小组件点击日志 -->
+    <string name="helper_apprentice">建筑工人学徒</string>
+    <string name="helper_assistant">实验室助手</string>
+    <string name="tap_helper_linked">%1$s 已关联到 %2$s</string>
+    <string name="tap_helper_moved"> （原先在 %1$s）</string>
+    <string name="tap_helper_unlinked">%1$s 已取消关联 %2$s</string>
+    <string name="tap_helper_no_change">点击助手没有变化</string>
+    <string name="tap_boost_added">%1$s +1 小时</string>
+    <string name="tap_boost_ignored"> （已忽略）</string>
+    <string name="tap_boost_undo">%1$s 撤销</string>
+    <string name="tap_boost_nothing"> （没有可撤销的）</string>
+    <string name="tap_unknown">未知点击 %1$s/%2$s</string>
+</resources>

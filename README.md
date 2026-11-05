@@ -21,6 +21,7 @@ A home screen widget for Android that shows your Clash of Clans builder, laborat
 - **Helper links:** tap `+` on a row to put the Apprentice or Lab Assistant on that upgrade.
 - **Notifications:** get told the moment a builder, the lab or the pet house is free. Tapping the notification opens Clash of Clans.
 - **Adjustable:** if Supercell rebalances something, you can change potion strength, helper savings, the helper interval and the builder count in Settings.
+- **English and 简体中文:** pick the language in **Settings → Language**, or leave it on the system default. Building, troop, spell, hero and pet names are translated as well (see [Languages](#languages)).
 
 <p align="center">
   <img src="docs/screenshots/potion-active.png" alt="The widget with a Builder Potion running: the potion button shows the time left and the builder countdowns are shorter" width="420">
@@ -35,6 +36,16 @@ Clash Timers isn't on the Play Store, so you install the APK yourself.
 3. Optional: compare the file's SHA-256 checksum with the one in the release notes.
 
 Requires Android 8.0 or newer.
+
+## Languages
+
+The app ships English and Simplified Chinese (`res/values-zh-rCN`). Change it in **Settings → Language**;
+the widget, the notifications and the sync log follow the same choice, and nothing needs a restart.
+
+The names in the widget come from `assets/names.json` (English). `assets/names.zh.json` is a translation
+overlay: IDs listed there use the Chinese name, anything else (usually content added by a recent game
+update) falls back to the English name instead of showing a wrong translation. To add a name, copy the
+numeric ID from `names.json` into the overlay.
 
 ## Setup
 

@@ -49,34 +49,39 @@ object WidgetActions {
     }
 
     /** One line for the on-screen log, e.g. `Apprentice → Logger → 5` or `Builder potion +1 h (until 23:44)`. */
-    fun describe(before: AppState, after: AppState, action: String, arg: String, names: NameMap): String {
+    fun describe(
+        before: AppState,
+        after: AppState,
+        action: String,
+        arg: String,
+        names: NameMap,
+        texts: Texts = Texts(),
+    ): String {
         fun jobName(key: String?) = key?.let { k -> after.export?.jobs?.firstOrNull { it.key == k } }?.let(names::label)
         return when (action) {
             HELPER -> {
                 val (helper, old, new) = if (after.links.apprenticeJobKey != before.links.apprenticeJobKey) {
-                    Triple("Apprentice", before.links.apprenticeJobKey, after.links.apprenticeJobKey)
+                    Triple(texts.apprenticeName, before.links.apprenticeJobKey, after.links.apprenticeJobKey)
                 } else {
-                    Triple("Lab Assistant", before.links.labAssistantJobKey, after.links.labAssistantJobKey)
+                    Triple(texts.assistantName, before.links.labAssistantJobKey, after.links.labAssistantJobKey)
                 }
                 when {
-                    old == new -> "Helper tap changed nothing"
-                    new == null -> "$helper unlinked from ${jobName(old) ?: "?"}"
-                    else -> "$helper linked to ${jobName(new)}" + (jobName(old)?.let { " (moved from $it)" } ?: "")
+                    old == new -> texts.helperNoChange
+                    new == null -> texts.helperUnlinked(helper, jobName(old) ?: "?")
+                    else -> texts.helperLinked(helper, jobName(new).orEmpty()) +
+                        (jobName(old)?.let { texts.helperMoved(it) } ?: "")
                 }
             }
-            ADD_BOOST -> "${boostName(arg)} +1 h" + if (after.boosts.size == before.boosts.size) " (ignored)" else ""
-            UNDO_BOOST -> "${boostName(arg)} undo" + if (after.boosts == before.boosts) " (nothing to undo)" else ""
-            else -> "Unknown tap $action/$arg"
+            ADD_BOOST -> texts.boostAdded(boostName(arg, texts)) +
+                if (after.boosts.size == before.boosts.size) texts.boostIgnored else ""
+            UNDO_BOOST -> texts.boostUndo(boostName(arg, texts)) +
+                if (after.boosts == before.boosts) texts.boostNothing else ""
+            else -> texts.unknownTap(action, arg)
         }
     }
 
-    private fun boostName(arg: String) = when (arg) {
-        BoostType.BUILDER_POTION.name -> "Builder potion"
-        BoostType.BUILDER_BITE.name -> "Builder Bite"
-        BoostType.RESEARCH_POTION.name -> "Research potion"
-        BoostType.PET_POTION.name -> "Pet potion"
-        else -> arg
-    }
+    private fun boostName(arg: String, texts: Texts): String =
+        BoostType.entries.firstOrNull { it.name == arg }?.let(texts::boostName) ?: arg
 }
 
 /** A "something finished" notification. */
@@ -92,7 +97,7 @@ object FinishNotices {
      * Jobs finished at [now] that haven't been announced yet, and the new [AppState.notified] set
      * (only keys that are still finished, so a job that is "un-finished" by an undo can be announced again).
      */
-    fun check(state: AppState, settings: AppSettings, names: NameMap, now: Long): Result {
+    fun check(state: AppState, settings: AppSettings, names: NameMap, now: Long, texts: Texts = Texts()): Result {
         val export = state.export ?: return Result(emptyList(), emptySet())
         val engine = TimerEngine(settings.boosts)
         val finished = export.jobs
@@ -101,7 +106,7 @@ object FinishNotices {
         val notices = finished
             .filter { (job, at) -> job.key !in state.notified && at > now - MAX_AGE_SEC }
             .sortedBy { it.second }
-            .map { (job, _) -> notice(job, names) }
+            .map { (job, _) -> notice(job, names, texts) }
         return Result(notices, finished.map { it.first.key }.toSet())
     }
 
@@ -120,14 +125,14 @@ object FinishNotices {
     fun alarmAt(state: AppState, settings: AppSettings, now: Long): Long? =
         nextFinish(state, settings, now)?.plus(Finish.GRACE_SEC)
 
-    fun notice(job: Job, names: NameMap): FinishNotice {
+    fun notice(job: Job, names: NameMap, texts: Texts = Texts()): FinishNotice {
         val title = names.title(job)
-        val text = if (job.isNewBuilding) "$title is built." else "$title reached level ${job.targetLevel}."
+        val text = if (job.isNewBuilding) texts.noticeBuilt(title) else texts.noticeLevel(title, job.targetLevel)
         val heading = when {
-            job.category == JobCategory.LAB -> "Lab free"
-            job.category == JobCategory.PET -> "Pet house free"
-            job.isGoblin -> "Goblin Builder done: $title"
-            else -> "Builder free: $title"
+            job.category == JobCategory.LAB -> texts.noticeLabFree
+            job.category == JobCategory.PET -> texts.noticePetFree
+            job.isGoblin -> texts.noticeGoblinDone(title)
+            else -> texts.noticeBuilderFree(title)
         }
         return FinishNotice(job.key, heading, text)
     }

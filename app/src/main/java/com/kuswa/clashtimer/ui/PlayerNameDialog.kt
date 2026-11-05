@@ -16,6 +16,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
+import com.kuswa.clashtimer.R
 import com.kuswa.clashtimer.core.AppSettings
 
 /**
@@ -28,18 +30,20 @@ import com.kuswa.clashtimer.core.AppSettings
 @Composable
 fun PlayerNameDialog(current: String?, firstLaunch: Boolean, onDone: (String) -> Unit, onDismiss: () -> Unit) {
     var text by remember { mutableStateOf(current.orEmpty()) }
+    // "Chief" in English, 首领 in Chinese: the header name the widget falls back to.
+    val defaultName = stringResource(R.string.chief)
     val save = { onDone(AppSettings.cleanName(text)) }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(if (firstLaunch) "Welcome, Chief!" else "Player name") },
+        title = { Text(stringResource(if (firstLaunch) R.string.welcome_chief else R.string.player_name_title)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text("What name should the widget show? Leave it empty to use \"${AppSettings.DEFAULT_PLAYER_NAME}\".")
+                Text(stringResource(R.string.name_question, defaultName))
                 OutlinedTextField(
                     value = text,
                     onValueChange = { text = it.take(AppSettings.MAX_PLAYER_NAME) },
                     singleLine = true,
-                    placeholder = { Text(AppSettings.DEFAULT_PLAYER_NAME) },
+                    placeholder = { Text(defaultName) },
                     supportingText = {
                         Text("${text.length}/${AppSettings.MAX_PLAYER_NAME}", style = MaterialTheme.typography.bodySmall)
                     },
@@ -48,9 +52,11 @@ fun PlayerNameDialog(current: String?, firstLaunch: Boolean, onDone: (String) ->
                 )
             }
         },
-        confirmButton = { TextButton(onClick = save) { Text("Save") } },
+        confirmButton = { TextButton(onClick = save) { Text(stringResource(R.string.save)) } },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text(if (firstLaunch) "Skip" else "Cancel") }
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(if (firstLaunch) R.string.skip else R.string.cancel))
+            }
         },
     )
 }

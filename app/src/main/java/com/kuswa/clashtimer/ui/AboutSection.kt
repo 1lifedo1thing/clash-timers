@@ -13,15 +13,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.kuswa.clashtimer.R
 
-/** Supercell's required wording for fan content (supercell.com/fan-content-policy). */
-const val FAN_CONTENT_DISCLAIMER =
-    "This material is unofficial and is not endorsed by Supercell. For more information see " +
-        "Supercell's Fan Content Policy: www.supercell.com/fan-content-policy."
-
-/** About: version, offline note, Supercell's fan content disclaimer, credits and the font licence. */
+/**
+ * About: version, offline note, Supercell's fan content disclaimer (supercell.com/fan-content-policy),
+ * credits and the font licence. The disclaimer is translated, but keeps the policy URL as-is.
+ */
 @Composable
 fun AboutSection() {
     val context = LocalContext.current
@@ -29,23 +29,14 @@ fun AboutSection() {
     var showLicence by remember { mutableStateOf(false) }
 
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        Text("About", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
-        Text("Clash Timers $version")
-        Text("Works fully offline", fontWeight = FontWeight.Bold)
-        Text(
-            "The app has no internet permission. It reads only the village data you copy in Clash of Clans, " +
-                "keeps it on this phone and sends nothing anywhere. No account, no ads, no tracking.",
-            style = MaterialTheme.typography.bodySmall,
-        )
-        Text(FAN_CONTENT_DISCLAIMER, style = MaterialTheme.typography.bodySmall)
-        Text(
-            "Clash of Clans names and images are the property of Supercell. Names, upgrade times and images " +
-                "come from the clash-of-clans-data package. Font: Lilita One by Juan Montoreano, " +
-                "SIL Open Font License 1.1.",
-            style = MaterialTheme.typography.bodySmall,
-        )
+        Text(stringResource(R.string.about), fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
+        Text(stringResource(R.string.about_version, version))
+        Text(stringResource(R.string.offline_title), fontWeight = FontWeight.Bold)
+        Text(stringResource(R.string.offline_text), style = MaterialTheme.typography.bodySmall)
+        Text(stringResource(R.string.fan_content_disclaimer), style = MaterialTheme.typography.bodySmall)
+        Text(stringResource(R.string.credits), style = MaterialTheme.typography.bodySmall)
         TextButton(onClick = { showLicence = !showLicence }) {
-            Text(if (showLicence) "Hide font licence" else "Show font licence")
+            Text(stringResource(if (showLicence) R.string.hide_font_licence else R.string.show_font_licence))
         }
         if (showLicence) {
             val licence = remember { readAsset(context, "licenses/LilitaOne-OFL.txt") }
@@ -62,4 +53,5 @@ private fun appVersion(context: Context): String = runCatching {
 }.getOrDefault("")
 
 private fun readAsset(context: Context, path: String): String =
-    runCatching { context.assets.open(path).bufferedReader().use { it.readText() } }.getOrDefault("Licence file missing.")
+    runCatching { context.assets.open(path).bufferedReader().use { it.readText() } }
+        .getOrDefault(context.getString(R.string.licence_missing))

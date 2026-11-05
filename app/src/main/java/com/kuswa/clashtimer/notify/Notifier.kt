@@ -14,6 +14,7 @@ import androidx.core.content.ContextCompat
 import com.kuswa.clashtimer.MainActivity
 import com.kuswa.clashtimer.R
 import com.kuswa.clashtimer.core.FinishNotice
+import com.kuswa.clashtimer.i18n.localized
 
 /** "Builder free: Inferno Tower" / "Lab free" / "Pet house free". */
 object Notifier {
@@ -23,9 +24,15 @@ object Notifier {
     fun ensureChannel(context: Context) {
         val nm = context.getSystemService(NotificationManager::class.java) ?: return
         if (nm.getNotificationChannel(CHANNEL_ID) != null) return
+        // The channel name is fixed at creation; changing the language later only affects the rest.
+        val res = context.localized().resources
         nm.createNotificationChannel(
-            NotificationChannel(CHANNEL_ID, "Upgrade finished", NotificationManager.IMPORTANCE_HIGH).apply {
-                description = "A builder, the lab or the pet house became free"
+            NotificationChannel(
+                CHANNEL_ID,
+                res.getString(R.string.channel_finished),
+                NotificationManager.IMPORTANCE_HIGH,
+            ).apply {
+                description = res.getString(R.string.channel_finished_description)
             },
         )
     }

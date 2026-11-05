@@ -1,0 +1,126 @@
+name: Android CI
+
+on:
+  push:
+    branches: [ main, 'feature/**' ]
+    tags: [ 'v*' ]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # The project asks for JDK 25; AGP 9.x needs at least 17.
+      - name: Set up JDK 25
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+
+      # The runner image ships the SDK already (android-actions/setup-android v3 is gone from
+      # this image: it still calls `sdkmanager tools`, which no longer exists). Only the platform
+      # that compileSdk 37 needs is missing.
+      - name: Install SDK platform 37
+        run: |
+          SDKMANAGER="$(find "$ANDROID_HOME/cmdline-tools" -maxdepth 3 -type f -name sdkmanager | head -1)"
+          echo "sdkmanager: $SDKMANAGER"
+          yes | "$SDKMANAGER" --licenses > /dev/null 2>&1 || true
+          "$SDKMANAGER" "platforms;android-37.0" || true
+          ls "$ANDROID_HOME/platforms"
+
+      # services.gradle.org answered 504 on this runner, so fetch the distribution from a mirror
+      # and check it against the checksum pinned in gradle-wrapper.properties.
+      - name: Provision Gradle 9.6.0
+        run: |
+          set -euo pipefail
+          SUM=bbaeb2fef8710818cf0e261201dab964c572f92b942812df0c3620d62a529a01
+          for URL in \
+            https://services.gradle.org/distributions/gradle-9.6.0-bin.zip \
+            https://downloads.gradle.org/distributions/gradle-9.6.0-bin.zip \
+            https://mirrors.cloud.tencent.com/gradle/gradle-9.6.0-bin.zip \
+            https://repo.huaweicloud.com/gradle/gradle-9.6.0-bin.zip
+          do
+            echo "::group::trying $URL"
+            if curl -fsSL --max-time 300 -o /tmp/gradle.zip "$URL" \
+               && echo "$SUM  /tmp/gradle.zip" | sha256sum -c -; then
+              unzip -q -o /tmp/gradle.zip -d "$RUNNER_TEMP"
+              echo "$RUNNER_TEMP/gradle-9.6.0/bin" >> "$GITHUB_PATH"
+              echo "::endgroup::"
+              exit 0
+            fi
+            echo "::endgroup::"
+          done
+          echo "no Gradle distribution could be downloaded" >&2
+          exit 1
+
+      - name: Unit tests
+        run: gradle :app:testDebugUnitTest --no-daemon
+
+      - name: Assemble debug APK
+        run: gradle assembleDebug --no-daemon
+
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: ClashTimers-debug
+          path: app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
+
+  # Signed release, only on a tag push. Needs KEYSTORE_BASE64 / STORE_PASSWORD /
+  # KEY_ALIAS / KEY_PASSWORD secrets; without them `assembleRelease` only makes an
+  # unsigned APK, which phones refuse to install.
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+
+      - name: Install SDK platform 37
+        run: |
+          SDKMANAGER="$(find "$ANDROID_HOME/cmdline-tools" -maxdepth 3 -type f -name sdkmanager | head -1)"
+          yes | "$SDKMANAGER" --licenses > /dev/null 2>&1 || true
+          "$SDKMANAGER" "platforms;android-37.0" || true
+
+
+      # app/build.gradle.kts reads ~/.android-signing/clashtimers/keystore.properties.
+      - name: Write keystore.properties from secrets
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$HOME/.android-signing/clashtimers"
+          printf '%s' "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/release.jks"
+          {
+            printf 'storeFile=%s\n' "$RUNNER_TEMP/release.jks"
+            printf 'storePassword=%s\n' "$STORE_PASSWORD"
+            printf 'keyAlias=%s\n' "$KEY_ALIAS"
+            printf 'keyPassword=%s\n' "$KEY_PASSWORD"
+          } > "$HOME/.android-signing/clashtimers/keystore.properties"
+
+      - name: Build signed release APK
+        run: gradle archiveRelease --no-daemon
+
+      - name: SHA-256 checksum
+        run: sha256sum ClashTimers-*.apk | tee SHA256SUMS.txt
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            ClashTimers-*.apk
+            SHA256SUMS.txt

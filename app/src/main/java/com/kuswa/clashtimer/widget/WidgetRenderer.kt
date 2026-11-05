@@ -28,12 +28,19 @@ import com.kuswa.clashtimer.core.RowButton
 import com.kuswa.clashtimer.core.RowKind
 import com.kuswa.clashtimer.core.WidgetModel
 import com.kuswa.clashtimer.core.WidgetModelBuilder
+import com.kuswa.clashtimer.core.Texts
 import com.kuswa.clashtimer.core.WidgetRow
+import com.kuswa.clashtimer.i18n.texts
 import com.kuswa.clashtimer.sync.SyncActivity
 import kotlin.math.roundToInt
 
-/** Maps a [WidgetModel] onto `widget_root.xml` + one `widget_row*.xml` per row. */
+/**
+ * Maps a [WidgetModel] onto `widget_root.xml` + one `widget_row*.xml` per row.
+ * [texts] follows the in-app language (the widget renders from a plain app context, not an activity).
+ */
 class WidgetRenderer(private val context: Context) {
+
+    private val texts: Texts = context.texts()
 
     private val pkg = context.packageName
     private val icons = WidgetIcons.get(context)
@@ -193,12 +200,12 @@ class WidgetRenderer(private val context: Context) {
         return PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
     }
 
-    /** Player name + small gold `TH18`. */
+    /** Player name + small gold `TH18` (Chinese: `18本`). */
     private fun title(model: WidgetModel): CharSequence {
         val sb = SpannableStringBuilder(model.playerName)
         model.townHall?.let { th ->
             val start = sb.length
-            sb.append(" TH$th")
+            sb.append(model.texts.townHallTag(th))
             sb.setSpan(AbsoluteSizeSpan(12, true), start, sb.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
             sb.setSpan(ForegroundColorSpan(COLOR_GOLD), start, sb.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
         }
@@ -210,7 +217,7 @@ class WidgetRenderer(private val context: Context) {
         val sb = SpannableStringBuilder(model.buildersLabel)
         if (model.goblinWorking) {
             val start = sb.length
-            sb.append(" + Goblin")
+            sb.append(model.texts.goblinTag)
             sb.setSpan(ForegroundColorSpan(COLOR_GOBLIN), start, sb.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
         }
         return sb

@@ -2,4 +2,203 @@
     <string name="app_name">Clash Timers</string>
     <string name="widget_name">Clash Timers</string>
     <string name="widget_description">Builder, lab and pet house timers from your village data export</string>
+
+    <!-- Launcher screen -->
+    <string name="sync_help">1. In Clash: Settings &gt; Data Export &gt; Copy.\n2. Come back here and tap the button.</string>
+    <string name="sync_button">Sync from clipboard</string>
+    <string name="sync_busy">Syncing…</string>
+    <string name="last_result">Last sync result</string>
+    <string name="no_sync_yet">No sync yet.</string>
+    <string name="sync_result_line">%1$s · %2$s · from %3$s\n%4$s</string>
+    <string name="status_ok">OK</string>
+    <string name="status_failed">FAILED</string>
+    <string name="export_copied_at">Export copied at %1$s (village %2$s)</string>
+    <string name="diagnostics">Diagnostics</string>
+    <string name="widget_section">Widget</string>
+    <string name="widgets_unknown">Widgets placed: unknown</string>
+    <string name="widgets_none">No Clash Timers widget is on the home screen yet.</string>
+    <string name="widgets_count">Widgets placed: %1$d</string>
+    <string name="diagnostics_icons">Icons in assets/icons: %1$d · upgrade times for %2$d items · exact alarms: %3$s</string>
+    <string name="exact_allowed">allowed</string>
+    <string name="exact_not_allowed">not allowed (1-min window)</string>
+    <string name="allow_exact_alarms">Allow exact alarms</string>
+    <string name="live_countdown">Live seconds countdown (turn off if the times don\'t show)</string>
+    <string name="refresh_widget">Refresh widget</string>
+    <string name="should_show">The widget should show:</string>
+    <string name="recent_activity">Recent activity</string>
+    <string name="nothing_yet">Nothing yet.</string>
+    <string name="widget_size_reported">%1$s×%2$s dp</string>
+    <string name="widget_size_unknown">size not reported</string>
+    <string name="rows_compact">compact 25 dp rows</string>
+    <string name="rows_normal">30 dp rows</string>
+    <string name="widget_size_line">Widget #%1$d: %2$s · %3$s (30 dp rows need about %4$d dp)</string>
+
+    <!-- Settings -->
+    <string name="settings">Settings</string>
+    <string name="player_name">Player name</string>
+    <string name="change">Change</string>
+    <string name="potions_heading">Potions and snacks: hours saved per hour of use</string>
+    <string name="builder_potion">Builder potion</string>
+    <string name="builder_bite">Builder Bite</string>
+    <string name="research_potion">Research potion</string>
+    <string name="pet_potion">Pet potion</string>
+    <string name="helpers_heading">Helpers</string>
+    <string name="apprentice_saving">Builder\'s Apprentice saves per session</string>
+    <string name="lab_assistant_saving">Lab Assistant saves per session</string>
+    <string name="helper_period">New helper session every</string>
+    <string name="helper_period_value">%1$d h</string>
+    <string name="helper_period_hint">23 h, as measured in game</string>
+    <string name="builders_heading">Builders</string>
+    <string name="total_builders">Total builders</string>
+    <string name="auto_value">Auto (%1$d)</string>
+    <string name="builders_hint">From Builder\'s Huts + B.O.B\'s Hut in the export</string>
+    <string name="auto">Auto</string>
+    <string name="boosts_goblin">Potions and Bites also speed up the Goblin Builder</string>
+    <string name="notifications_heading">Notifications</string>
+    <string name="notify_free">Notify when a builder, the lab or the pet house is free</string>
+    <string name="notifications_blocked">Notifications are blocked for this app, so nothing will be shown.</string>
+    <string name="allow">Allow</string>
+    <string name="open_settings">Open settings</string>
+    <string name="battery_hint">If notifications arrive late or not after a reboot, allow Auto-start and set battery use to \"No restrictions\" for Clash Timers in the phone\'s app settings.</string>
+    <string name="app_settings_button">App settings (battery, auto-start)</string>
+    <string name="reset_settings">Reset settings to defaults</string>
+    <string name="hours_value">%1$d h (%2$dx)</string>
+    <string name="auto_hours">Auto (%1$s)</string>
+    <string name="level">level</string>
+    <string name="helper_level_hint">Helper level = hours saved</string>
+
+    <!-- Language -->
+    <string name="language">Language</string>
+    <string name="language_system">System default</string>
+    <string name="language_zh">简体中文</string>
+    <string name="language_en">English</string>
+
+    <!-- Player name dialog -->
+    <string name="chief">Chief</string>
+    <string name="welcome_chief">Welcome, Chief!</string>
+    <string name="player_name_title">Player name</string>
+    <string name="name_question">What name should the widget show? Leave it empty to use \"%1$s\".</string>
+    <string name="save">Save</string>
+    <string name="skip">Skip</string>
+    <string name="cancel">Cancel</string>
+
+    <!-- About -->
+    <string name="about">About</string>
+    <string name="about_version">Clash Timers %1$s</string>
+    <string name="offline_title">Works fully offline</string>
+    <string name="offline_text">The app has no internet permission. It reads only the village data you copy in Clash of Clans, keeps it on this phone and sends nothing anywhere. No account, no ads, no tracking.</string>
+    <string name="fan_content_disclaimer">This material is unofficial and is not endorsed by Supercell. For more information see Supercell\'s Fan Content Policy: www.supercell.com/fan-content-policy.</string>
+    <string name="credits">Clash of Clans names and images are the property of Supercell. Names, upgrade times and images come from the clash-of-clans-data package. Font: Lilita One by Juan Montoreano, SIL Open Font License 1.1.</string>
+    <string name="show_font_licence">Show font licence</string>
+    <string name="hide_font_licence">Hide font licence</string>
+    <string name="licence_missing">Licence file missing.</string>
+
+    <!-- Diagnostics: crash report -->
+    <string name="last_crash">Last crash</string>
+    <string name="none_saved">None saved.</string>
+    <string name="copy">Copy</string>
+    <string name="show">Show</string>
+    <string name="hide">Hide</string>
+    <string name="clear">Clear</string>
+    <string name="open_crash_screen">Open crash screen</string>
+    <string name="test_crash_screen">Test crash screen</string>
+    <string name="test_crash_message">Test crash from the Diagnostics button (not a real error)</string>
+
+    <!-- Crash screen -->
+    <string name="crash_label">Clash Timers crash</string>
+    <string name="crash_title">Clash Timers stopped</string>
+    <string name="crash_body">The app hit an error and was closed. Tap Copy and paste the text into your chat, so the cause can be found. The same text stays in the app under Diagnostics &gt; Last crash.</string>
+    <string name="crash_no_report">No crash report was saved.</string>
+    <string name="channel_crash">App errors</string>
+    <string name="channel_crash_description">Shown when Clash Timers stops because of an error</string>
+    <string name="crash_notification_title">Clash Timers stopped</string>
+    <string name="crash_notification_text">Tap to see the error and copy it</string>
+    <string name="open_app">Open app</string>
+    <string name="close">Close</string>
+    <string name="copied">Copied</string>
+
+    <!-- Sync log -->
+    <string name="log_no_widget">No Clash Timers widget is placed on the home screen</string>
+    <string name="log_sync_opened">Sync screen opened from widget</string>
+    <string name="log_no_focus">No window focus after %1$d ms; read clipboard anyway</string>
+    <string name="log_timeout">Sync screen timed out without finishing</string>
+    <string name="log_notified">Notified: %1$s</string>
+    <string name="log_notified_blocked">Not notified (notifications are blocked for the app): %1$s</string>
+    <string name="log_finished_off">Finished (notifications off): %1$s</string>
+    <string name="log_error">Error: %1$s: %2$s</string>
+    <string name="log_tap_failed">Tap failed: %1$s: %2$s</string>
+    <string name="log_notification_failed">Notification failed: %1$s: %2$s</string>
+    <string name="log_widget_refresh_failed">Widget refresh failed: %1$s: %2$s</string>
+    <string name="log_entry_separator">; </string>
+
+    <!-- Notifications -->
+    <string name="channel_finished">Upgrade finished</string>
+    <string name="channel_finished_description">A builder, the lab or the pet house became free</string>
+
+    <!-- Widget and model text -->
+    <string name="w_builders">BUILDERS %1$d/%2$d</string>
+    <string name="w_completed">Completed</string>
+    <string name="w_idle">Idle</string>
+    <string name="w_sync_failed">Sync failed — copy data and tap Sync</string>
+    <string name="w_no_data">Copy village data in Clash, then tap Sync</string>
+    <string name="w_laboratory">Laboratory</string>
+    <string name="w_pet_house">Pet House</string>
+    <string name="w_crafted_defense">Crafted defense</string>
+    <string name="w_new">(new)</string>
+    <string name="w_unknown">Unknown (%1$d)</string>
+    <string name="w_goblin_tag"> + Goblin</string>
+    <string name="w_town_hall_tag"> TH%1$d</string>
+    <string name="w_bite">Bite</string>
+    <string name="w_boost_add">+1</string>
+    <string name="w_helpers_both">Helpers: %1$s · %2$s</string>
+    <string name="w_apprentice_busy">Apprentice: %1$s</string>
+    <string name="w_apprentice_idle">Apprentice idle</string>
+    <string name="w_assistant_busy">Assistant: %1$s</string>
+    <string name="w_assistant_idle">Assistant idle</string>
+    <string name="w_helpers_separator"> · </string>
+    <string name="w_synced_ago">synced %1$s</string>
+    <string name="w_just_now">just now</string>
+    <string name="w_minutes_ago">%1$dm ago</string>
+    <string name="w_hours_ago">%1$dh ago</string>
+    <string name="w_days_ago">%1$dd ago</string>
+    <string name="w_days_hours">%1$dd %2$dh</string>
+    <string name="w_hours_minutes">%1$dh %2$dm</string>
+    <string name="w_hours">%1$dh</string>
+    <string name="w_minutes">%1$dm</string>
+
+    <!-- Sync summary -->
+    <string name="sync_failed_prefix">Sync failed: %1$s</string>
+    <string name="reason_clipboard_empty">Clipboard is empty</string>
+    <string name="reason_not_village">Not village data: %1$s</string>
+    <string name="reason_older">Clipboard export is older than the last sync</string>
+    <string name="sync_synced">Synced</string>
+    <plurals name="sync_builder_jobs">
+        <item quantity="one"> · %1$d builder job</item>
+        <item quantity="other"> · %1$d builder jobs</item>
+    </plurals>
+    <string name="sync_lab"> · lab: %1$s</string>
+    <string name="sync_pet"> · pet: %1$s</string>
+    <string name="sync_idle">idle</string>
+    <string name="sync_boost_left"> · builder potion %1$s left</string>
+
+    <!-- Finish notifications -->
+    <string name="notice_builder_free">Builder free: %1$s</string>
+    <string name="notice_lab_free">Lab free</string>
+    <string name="notice_pet_free">Pet house free</string>
+    <string name="notice_goblin_done">Goblin Builder done: %1$s</string>
+    <string name="notice_built">%1$s is built.</string>
+    <string name="notice_level">%1$s reached level %2$d.</string>
+
+    <!-- Widget taps written to the log -->
+    <string name="helper_apprentice">Apprentice</string>
+    <string name="helper_assistant">Lab Assistant</string>
+    <string name="tap_helper_linked">%1$s linked to %2$s</string>
+    <string name="tap_helper_moved"> (moved from %1$s)</string>
+    <string name="tap_helper_unlinked">%1$s unlinked from %2$s</string>
+    <string name="tap_helper_no_change">Helper tap changed nothing</string>
+    <string name="tap_boost_added">%1$s +1 h</string>
+    <string name="tap_boost_ignored"> (ignored)</string>
+    <string name="tap_boost_undo">%1$s undo</string>
+    <string name="tap_boost_nothing"> (nothing to undo)</string>
+    <string name="tap_unknown">Unknown tap %1$s/%2$s</string>
 </resources>

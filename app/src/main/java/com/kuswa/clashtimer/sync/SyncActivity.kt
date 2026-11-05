@@ -6,6 +6,7 @@ import android.os.Looper
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.lifecycleScope
+import com.kuswa.clashtimer.R
 import com.kuswa.clashtimer.data.StateRepository
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
@@ -26,13 +27,13 @@ class SyncActivity : ComponentActivity() {
 
     private val focusFallback = Runnable { startSync(viaFallback = true) }
     private val hardTimeout = Runnable {
-        log(false, "Sync screen timed out without finishing")
+        log(false, getString(R.string.log_timeout))
         finishQuietly()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        log(null, "Sync screen opened from widget")
+        log(null, getString(R.string.log_sync_opened))
         handler.postDelayed(hardTimeout, HARD_TIMEOUT_MS)
     }
 
@@ -55,7 +56,7 @@ class SyncActivity : ComponentActivity() {
         handler.removeCallbacks(focusFallback)
 
         val text = SyncRunner.readClipboard(this)
-        if (viaFallback) log(null, "No window focus after ${FOCUS_FALLBACK_MS} ms; read clipboard anyway")
+        if (viaFallback) log(null, getString(R.string.log_no_focus, FOCUS_FALLBACK_MS.toInt()))
 
         lifecycleScope.launch {
             val result = SyncRunner.sync(this@SyncActivity, text, SOURCE)

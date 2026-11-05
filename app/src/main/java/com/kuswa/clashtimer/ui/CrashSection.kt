@@ -22,6 +22,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
+import com.kuswa.clashtimer.R
 import com.kuswa.clashtimer.crash.CrashActivity
 import com.kuswa.clashtimer.crash.CrashReport
 import com.kuswa.clashtimer.crash.CrashReporter
@@ -34,10 +36,10 @@ fun CrashSection() {
     var expanded by remember { mutableStateOf(false) }
 
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Text("Last crash", fontWeight = FontWeight.Bold)
+        Text(stringResource(R.string.last_crash), fontWeight = FontWeight.Bold)
         val r = report
         if (r == null) {
-            Text("None saved.", style = MaterialTheme.typography.bodySmall)
+            Text(stringResource(R.string.none_saved), style = MaterialTheme.typography.bodySmall)
         } else {
             Text(
                 "${CrashReport.time(r) ?: "?"}\n${CrashReport.summary(r)}",
@@ -47,14 +49,16 @@ fun CrashSection() {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedButton(onClick = {
                     context.getSystemService(ClipboardManager::class.java)
-                        ?.setPrimaryClip(ClipData.newPlainText("Clash Timers crash", r))
-                }) { Text("Copy") }
-                OutlinedButton(onClick = { expanded = !expanded }) { Text(if (expanded) "Hide" else "Show") }
+                        ?.setPrimaryClip(ClipData.newPlainText(context.getString(R.string.crash_label), r))
+                }) { Text(stringResource(R.string.copy)) }
+                OutlinedButton(onClick = { expanded = !expanded }) {
+                    Text(stringResource(if (expanded) R.string.hide else R.string.show))
+                }
                 OutlinedButton(onClick = {
                     CrashReporter.clear(context)
                     report = null
                     expanded = false
-                }) { Text("Clear") }
+                }) { Text(stringResource(R.string.clear)) }
             }
             if (expanded) {
                 SelectionContainer(Modifier.horizontalScroll(rememberScrollState())) {
@@ -63,10 +67,15 @@ fun CrashSection() {
             }
         }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            if (r != null) TextButton(onClick = { context.startActivity(CrashActivity.intent(context)) }) { Text("Open crash screen") }
+            if (r != null) {
+                TextButton(onClick = { context.startActivity(CrashActivity.intent(context)) }) {
+                    Text(stringResource(R.string.open_crash_screen))
+                }
+            }
             // Lets the player check that the crash screen opens on their phone (no adb to check it otherwise).
-            TextButton(onClick = { throw RuntimeException("Test crash from the Diagnostics button (not a real error)") }) {
-                Text("Test crash screen")
+            val testMessage = stringResource(R.string.test_crash_message)
+            TextButton(onClick = { throw RuntimeException(testMessage) }) {
+                Text(stringResource(R.string.test_crash_screen))
             }
         }
     }
